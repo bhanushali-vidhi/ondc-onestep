@@ -2,10 +2,25 @@
 
 import { motion } from "framer-motion";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useStore } from "@/lib/storeContext";
 import { useToast } from "@/components/ui/Toast";
 import EmptyState from "@/components/ui/EmptyState";
+
+function WelcomeFlash() {
+  const params = useSearchParams();
+  const toast = useToast();
+  useEffect(() => {
+    if (params.get("welcome") === "1") {
+      toast.show({
+        title: "Welcome to ONDC OneStep 🎉",
+        description: "Your store is live across India's ONDC network.",
+        variant: "success",
+      });
+    }
+  }, [params, toast]);
+  return null;
+}
 
 const baseMetrics = [
   { label: "Orders Today", key: "orders", prefix: "" as string, suffix: "" as string },
@@ -37,24 +52,12 @@ function greetingFor(date: Date) {
 export default function OverviewPage() {
   const { data, hydrated } = useStore();
   const toast = useToast();
-  const params = useSearchParams();
   const [greeting, setGreeting] = useState("");
 
   // Time-of-day greeting (client-only to avoid hydration mismatch)
   useEffect(() => {
     setGreeting(greetingFor(new Date()));
   }, []);
-
-  // One-time post-onboarding welcome
-  useEffect(() => {
-    if (params.get("welcome") === "1") {
-      toast.show({
-        title: "Welcome to ONDC OneStep 🎉",
-        description: "Your store is live across India's ONDC network.",
-        variant: "success",
-      });
-    }
-  }, [params, toast]);
 
   if (!hydrated) {
     return <div className="h-[600px] rounded-md bg-bg-card animate-pulse" />;
@@ -69,6 +72,9 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-6">
+      <Suspense fallback={null}>
+        <WelcomeFlash />
+      </Suspense>
       {/* Welcome banner */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
