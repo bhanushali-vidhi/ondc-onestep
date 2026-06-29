@@ -3,268 +3,148 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState } from "react";
 
+type Category = "buyers" | "logistics" | "payments";
+
 type Node = {
   id: string;
   label: string;
-  category: "buyers" | "logistics" | "payments";
+  category: Category;
   icon: string;
   color: string;
   detail: { type: string; stats: { label: string; value: string }[] };
 };
 
 const nodes: Node[] = [
-  // Buyer apps (top arc)
-  {
-    id: "paytm",
-    label: "Paytm",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "P",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "Monthly Users", value: "350M" },
-        { label: "Avg Orders/day", value: "127" },
-        { label: "Latency", value: "<200ms" },
-      ],
-    },
-  },
-  {
-    id: "phonepe",
-    label: "PhonePe",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "P",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "Monthly Users", value: "500M" },
-        { label: "Avg Orders/day", value: "94" },
-        { label: "Latency", value: "<180ms" },
-      ],
-    },
-  },
-  {
-    id: "magicpin",
-    label: "Magicpin",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "M",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "Active Users", value: "12M" },
-        { label: "Avg Orders/day", value: "41" },
-        { label: "Local reach", value: "Hyperlocal" },
-      ],
-    },
-  },
-  {
-    id: "snapdeal",
-    label: "Snapdeal",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "S",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "Monthly Users", value: "60M" },
-        { label: "Avg Orders/day", value: "38" },
-        { label: "Categories", value: "All" },
-      ],
-    },
-  },
-  {
-    id: "meesho",
-    label: "Meesho",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "M",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "Tier 2/3 reach", value: "Strong" },
-        { label: "Avg Orders/day", value: "62" },
-        { label: "Latency", value: "<210ms" },
-      ],
-    },
-  },
-  {
-    id: "mystore",
-    label: "MyStore",
-    category: "buyers",
-    color: "var(--accent)",
-    icon: "M",
-    detail: {
-      type: "Buyer App",
-      stats: [
-        { label: "ONDC native", value: "Yes" },
-        { label: "Avg Orders/day", value: "29" },
-        { label: "Latency", value: "<195ms" },
-      ],
-    },
-  },
+  // Buyer apps — left column
+  { id: "paytm", label: "Paytm", category: "buyers", color: "var(--accent)", icon: "P",
+    detail: { type: "Buyer App", stats: [
+      { label: "Monthly Users", value: "350M" },
+      { label: "Avg Orders/day", value: "127" },
+      { label: "Latency", value: "<200ms" },
+    ]}},
+  { id: "phonepe", label: "PhonePe", category: "buyers", color: "var(--accent)", icon: "P",
+    detail: { type: "Buyer App", stats: [
+      { label: "Monthly Users", value: "500M" },
+      { label: "Avg Orders/day", value: "94" },
+      { label: "Latency", value: "<180ms" },
+    ]}},
+  { id: "magicpin", label: "Magicpin", category: "buyers", color: "var(--accent)", icon: "M",
+    detail: { type: "Buyer App", stats: [
+      { label: "Active Users", value: "12M" },
+      { label: "Avg Orders/day", value: "41" },
+      { label: "Local reach", value: "Hyperlocal" },
+    ]}},
+  { id: "snapdeal", label: "Snapdeal", category: "buyers", color: "var(--accent)", icon: "S",
+    detail: { type: "Buyer App", stats: [
+      { label: "Monthly Users", value: "60M" },
+      { label: "Avg Orders/day", value: "38" },
+      { label: "Categories", value: "All" },
+    ]}},
+  { id: "meesho", label: "Meesho", category: "buyers", color: "var(--accent)", icon: "M",
+    detail: { type: "Buyer App", stats: [
+      { label: "Tier 2/3 reach", value: "Strong" },
+      { label: "Avg Orders/day", value: "62" },
+      { label: "Latency", value: "<210ms" },
+    ]}},
+  { id: "mystore", label: "MyStore", category: "buyers", color: "var(--accent)", icon: "M",
+    detail: { type: "Buyer App", stats: [
+      { label: "ONDC native", value: "Yes" },
+      { label: "Avg Orders/day", value: "29" },
+      { label: "Latency", value: "<195ms" },
+    ]}},
 
-  // Logistics (bottom-right arc)
-  {
-    id: "delhivery",
-    label: "Delhivery",
-    category: "logistics",
-    color: "var(--secondary)",
-    icon: "🚚",
-    detail: {
-      type: "Logistics",
-      stats: [
-        { label: "Pincode reach", value: "18,800+" },
-        { label: "Avg pickup", value: "4h" },
-        { label: "SLA", value: "99.2%" },
-      ],
-    },
-  },
-  {
-    id: "dunzo",
-    label: "Dunzo",
-    category: "logistics",
-    color: "var(--secondary)",
-    icon: "🛵",
-    detail: {
-      type: "Logistics",
-      stats: [
-        { label: "Cities", value: "8 metros" },
-        { label: "Avg delivery", value: "45m" },
-        { label: "Best for", value: "Hyperlocal" },
-      ],
-    },
-  },
-  {
-    id: "shiprocket",
-    label: "Shiprocket",
-    category: "logistics",
-    color: "var(--secondary)",
-    icon: "📦",
-    detail: {
-      type: "Logistics",
-      stats: [
-        { label: "Couriers", value: "17+" },
-        { label: "Cheapest auto-pick", value: "Yes" },
-        { label: "Pan-India", value: "Yes" },
-      ],
-    },
-  },
+  // Logistics — right column
+  { id: "delhivery", label: "Delhivery", category: "logistics", color: "var(--secondary)", icon: "🚚",
+    detail: { type: "Logistics", stats: [
+      { label: "Pincode reach", value: "18,800+" },
+      { label: "Avg pickup", value: "4h" },
+      { label: "SLA", value: "99.2%" },
+    ]}},
+  { id: "dunzo", label: "Dunzo", category: "logistics", color: "var(--secondary)", icon: "🛵",
+    detail: { type: "Logistics", stats: [
+      { label: "Cities", value: "8 metros" },
+      { label: "Avg delivery", value: "45m" },
+      { label: "Best for", value: "Hyperlocal" },
+    ]}},
+  { id: "shiprocket", label: "Shiprocket", category: "logistics", color: "var(--secondary)", icon: "📦",
+    detail: { type: "Logistics", stats: [
+      { label: "Couriers", value: "17+" },
+      { label: "Cheapest auto-pick", value: "Yes" },
+      { label: "Pan-India", value: "Yes" },
+    ]}},
 
-  // Payment rails (bottom-left arc)
-  {
-    id: "upi",
-    label: "UPI",
-    category: "payments",
-    color: "var(--tertiary)",
-    icon: "⚡",
-    detail: {
-      type: "Payment Rail",
-      stats: [
-        { label: "Success rate", value: "98.4%" },
-        { label: "Settlement", value: "T+1" },
-        { label: "MDR", value: "0%" },
-      ],
-    },
-  },
-  {
-    id: "cards",
-    label: "Cards",
-    category: "payments",
-    color: "var(--tertiary)",
-    icon: "💳",
-    detail: {
-      type: "Payment Rail",
-      stats: [
-        { label: "Visa / MC / Rupay", value: "All" },
-        { label: "3DS", value: "Enforced" },
-        { label: "Settlement", value: "T+2" },
-      ],
-    },
-  },
-  {
-    id: "netbanking",
-    label: "NetBanking",
-    category: "payments",
-    color: "var(--tertiary)",
-    icon: "🏦",
-    detail: {
-      type: "Payment Rail",
-      stats: [
-        { label: "Banks", value: "60+" },
-        { label: "Avg latency", value: "1.2s" },
-        { label: "Best for", value: "High value" },
-      ],
-    },
-  },
+  // Payment rails — bottom row
+  { id: "upi", label: "UPI", category: "payments", color: "var(--tertiary)", icon: "⚡",
+    detail: { type: "Payment Rail", stats: [
+      { label: "Success rate", value: "98.4%" },
+      { label: "Settlement", value: "T+1" },
+      { label: "MDR", value: "0%" },
+    ]}},
+  { id: "cards", label: "Cards", category: "payments", color: "var(--tertiary)", icon: "💳",
+    detail: { type: "Payment Rail", stats: [
+      { label: "Visa / MC / Rupay", value: "All" },
+      { label: "3DS", value: "Enforced" },
+      { label: "Settlement", value: "T+2" },
+    ]}},
+  { id: "netbanking", label: "NetBanking", category: "payments", color: "var(--tertiary)", icon: "🏦",
+    detail: { type: "Payment Rail", stats: [
+      { label: "Banks", value: "60+" },
+      { label: "Avg latency", value: "1.2s" },
+      { label: "Best for", value: "High value" },
+    ]}},
 ];
 
-/**
- * Sectored radial layout — each category gets its own angular wedge so
- * labels never compete for the same arc.
- *
- * Angle convention: 0° points right, 90° points down (SVG default).
- * - Buyers:    top arc, 200° → 340° (counter-clockwise through 270° = top)
- * - Logistics: bottom-right, 20° → 80°
- * - Payments:  bottom-left, 100° → 160°
- */
-const SECTORS = {
-  buyers: { start: 200, end: 340, radius: 220, label: "Buyer Apps" },
-  logistics: { start: 20, end: 80, radius: 240, label: "Logistics" },
-  payments: { start: 100, end: 160, radius: 240, label: "Payment Rails" },
-} as const;
+const VB = { w: 1000, h: 620 };
+const CENTER = { x: VB.w / 2, y: 250 }; // store hub
+const HUB_R = 64;
+const NODE_R = 28; // node circle radius
+const NODE_BOX = 64; // hit box
 
-function polar(deg: number, r: number) {
-  const rad = (deg * Math.PI) / 180;
-  return { x: Math.cos(rad) * r, y: Math.sin(rad) * r };
-}
+const COL_X = { buyers: 110, logistics: VB.w - 110 } as const;
+const PAY_Y = 540;
 
-function arcPath(startDeg: number, endDeg: number, r: number, sweep = 0) {
-  const s = polar(startDeg, r);
-  const e = polar(endDeg, r);
-  const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} ${sweep} ${e.x} ${e.y}`;
-}
+function nodePositions() {
+  const out: (Node & { x: number; y: number })[] = [];
 
-function sectorWedge(startDeg: number, endDeg: number, inner: number, outer: number) {
-  const sOuter = polar(startDeg, outer);
-  const eOuter = polar(endDeg, outer);
-  const sInner = polar(startDeg, inner);
-  const eInner = polar(endDeg, inner);
-  const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
-  return `
-    M ${sOuter.x} ${sOuter.y}
-    A ${outer} ${outer} 0 ${large} 1 ${eOuter.x} ${eOuter.y}
-    L ${eInner.x} ${eInner.y}
-    A ${inner} ${inner} 0 ${large} 0 ${sInner.x} ${sInner.y}
-    Z
-  `;
+  const buyers = nodes.filter((n) => n.category === "buyers");
+  const logistics = nodes.filter((n) => n.category === "logistics");
+  const payments = nodes.filter((n) => n.category === "payments");
+
+  // Buyers — vertical column, evenly spaced
+  buyers.forEach((n, i) => {
+    const top = 60;
+    const bottom = 440;
+    const span = bottom - top;
+    const y = top + (buyers.length === 1 ? span / 2 : (i / (buyers.length - 1)) * span);
+    out.push({ ...n, x: COL_X.buyers, y });
+  });
+
+  // Logistics — vertical column on right
+  logistics.forEach((n, i) => {
+    const top = 130;
+    const bottom = 370;
+    const span = bottom - top;
+    const y = top + (logistics.length === 1 ? span / 2 : (i / (logistics.length - 1)) * span);
+    out.push({ ...n, x: COL_X.logistics, y });
+  });
+
+  // Payments — horizontal row at bottom, centered
+  const payCount = payments.length;
+  const paySpan = 480;
+  const payStart = (VB.w - paySpan) / 2;
+  payments.forEach((n, i) => {
+    const x = payStart + (payCount === 1 ? paySpan / 2 : (i / (payCount - 1)) * paySpan);
+    out.push({ ...n, x, y: PAY_Y });
+  });
+
+  return out;
 }
 
 export default function NetworkMap() {
   const [active, setActive] = useState<Node | null>(null);
   const [hover, setHover] = useState<string | null>(null);
 
-  // Precompute positions for each node
-  const positioned = useMemo(() => {
-    const groups = ["buyers", "logistics", "payments"] as const;
-    const result: (Node & { x: number; y: number; angle: number })[] = [];
-    groups.forEach((cat) => {
-      const sec = SECTORS[cat];
-      const items = nodes.filter((n) => n.category === cat);
-      const span = sec.end - sec.start;
-      // Distribute evenly with margin from edges
-      items.forEach((n, i) => {
-        const t = items.length === 1 ? 0.5 : i / (items.length - 1);
-        // Add 8% inset on each side so nodes don't kiss the wedge edges
-        const angle = sec.start + (0.08 + t * 0.84) * span;
-        const { x, y } = polar(angle, sec.radius);
-        result.push({ ...n, x, y, angle });
-      });
-    });
-    return result;
-  }, []);
+  const positioned = useMemo(nodePositions, []);
 
   return (
     <section id="network" className="relative py-[96px] lg:py-[128px] overflow-hidden">
@@ -280,128 +160,89 @@ export default function NetworkMap() {
             Plug into the entire <span className="text-accent">ONDC ecosystem</span>.
           </h2>
           <p className="mt-4 text-[17px] text-fg-muted max-w-[640px] mx-auto">
-            Buyer apps, logistics, payment rails — every node visible in real-time. Hover to inspect, click to dive in.
+            Buyer apps send you orders. Logistics partners deliver them. Payments settle automatically.
           </p>
         </div>
 
         <div className="relative">
-          <div className="relative aspect-[5/4] max-w-[920px] mx-auto">
+          <div
+            className="relative mx-auto"
+            style={{ maxWidth: VB.w, aspectRatio: `${VB.w} / ${VB.h}` }}
+          >
             <svg
-              viewBox="-480 -340 960 680"
+              viewBox={`0 0 ${VB.w} ${VB.h}`}
               className="absolute inset-0 w-full h-full"
               preserveAspectRatio="xMidYMid meet"
             >
               <defs>
-                <radialGradient id="buyers-grad" cx="0.5" cy="0.5" r="0.5">
-                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08" />
-                </radialGradient>
-                <radialGradient id="logistics-grad" cx="0.5" cy="0.5" r="0.5">
-                  <stop offset="0%" stopColor="var(--secondary)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--secondary)" stopOpacity="0.08" />
-                </radialGradient>
-                <radialGradient id="payments-grad" cx="0.5" cy="0.5" r="0.5">
-                  <stop offset="0%" stopColor="var(--tertiary)" stopOpacity="0" />
-                  <stop offset="100%" stopColor="var(--tertiary)" stopOpacity="0.08" />
-                </radialGradient>
+                <linearGradient id="zone-buyers" x1="0" x2="1">
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.10" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="zone-logistics" x1="1" x2="0">
+                  <stop offset="0%" stopColor="var(--secondary)" stopOpacity="0.10" />
+                  <stop offset="100%" stopColor="var(--secondary)" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id="zone-payments" x1="0" y1="1" x2="0" y2="0">
+                  <stop offset="0%" stopColor="var(--tertiary)" stopOpacity="0.10" />
+                  <stop offset="100%" stopColor="var(--tertiary)" stopOpacity="0" />
+                </linearGradient>
               </defs>
 
-              {/* Sector wedges (very faint backdrops) */}
-              {(["buyers", "logistics", "payments"] as const).map((cat) => {
-                const sec = SECTORS[cat];
-                return (
-                  <path
-                    key={cat}
-                    d={sectorWedge(sec.start, sec.end, 110, sec.radius + 80)}
-                    fill={`url(#${cat}-grad)`}
-                  />
-                );
-              })}
+              {/* Soft zone backgrounds (with rounded corners) */}
+              <rect x="40" y="30" width="170" height="460" rx="24" fill="url(#zone-buyers)" />
+              <rect x={VB.w - 210} y="30" width="170" height="460" rx="24" fill="url(#zone-logistics)" />
+              <rect x="260" y="500" width="480" height="100" rx="24" fill="url(#zone-payments)" />
 
-              {/* Sector arc rails (where nodes sit) */}
-              {(["buyers", "logistics", "payments"] as const).map((cat) => {
-                const sec = SECTORS[cat];
-                const color =
-                  cat === "buyers"
-                    ? "var(--accent)"
-                    : cat === "logistics"
-                    ? "var(--secondary)"
-                    : "var(--tertiary)";
-                return (
-                  <path
-                    key={`rail-${cat}`}
-                    d={arcPath(sec.start, sec.end, sec.radius, 1)}
-                    fill="none"
-                    stroke={color}
-                    strokeOpacity="0.15"
-                    strokeWidth="1.5"
-                    strokeDasharray="3 6"
-                  />
-                );
-              })}
-
-              {/* Sector labels (curved, follow the arc) */}
-              {(["buyers", "logistics", "payments"] as const).map((cat) => {
-                const sec = SECTORS[cat];
-                const mid = (sec.start + sec.end) / 2;
-                const labelR = sec.radius + 64;
-                const { x, y } = polar(mid, labelR);
-                const color =
-                  cat === "buyers"
-                    ? "var(--accent)"
-                    : cat === "logistics"
-                    ? "var(--secondary)"
-                    : "var(--tertiary)";
-                return (
-                  <g key={`label-${cat}`}>
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      fontSize="11"
-                      letterSpacing="0.2em"
-                      fontFamily="var(--font-dm)"
-                      fontWeight="600"
-                      fill={color}
-                      opacity="0.7"
-                    >
-                      {sec.label.toUpperCase()}
-                    </text>
-                    <text
-                      x={x}
-                      y={y + 14}
-                      textAnchor="middle"
-                      fontSize="10"
-                      fontFamily="var(--font-jetbrains)"
-                      fill="var(--fg-muted)"
-                    >
-                      {nodes.filter((n) => n.category === cat).length} nodes
-                    </text>
-                  </g>
-                );
-              })}
+              {/* Zone headers */}
+              <ZoneHeader x={110} y={20} label="BUYER APPS" count={6} color="var(--accent)" />
+              <ZoneHeader x={VB.w - 110} y={20} label="LOGISTICS" count={3} color="var(--secondary)" />
+              <ZoneHeader x={VB.w / 2} y={490} label="PAYMENTS" count={3} color="var(--tertiary)" sub />
 
               {/* Connection lines */}
               {positioned.map((n) => {
                 const isHover = hover === n.id;
                 const isActive = active?.id === n.id;
                 const dim = (hover && !isHover) || (active && !isActive);
+
+                // Curved bezier from node to hub edge
+                const dx = CENTER.x - n.x;
+                const dy = CENTER.y - n.y;
+                const len = Math.hypot(dx, dy);
+                // Trim line so it stops at the edge of node and hub
+                const t1 = NODE_R / len;
+                const t2 = (len - HUB_R) / len;
+                const start = { x: n.x + dx * t1, y: n.y + dy * t1 };
+                const end = { x: n.x + dx * t2, y: n.y + dy * t2 };
+
+                // Curve control point for natural arc
+                let cx: number, cy: number;
+                if (n.category === "payments") {
+                  // Curve downward into the center
+                  cx = (start.x + end.x) / 2;
+                  cy = start.y;
+                } else {
+                  // Horizontal curve
+                  cx = (start.x + end.x) / 2;
+                  cy = (start.y + end.y) / 2;
+                }
+                const path = `M ${start.x} ${start.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
+
                 return (
                   <g key={`line-${n.id}`} opacity={dim ? 0.15 : 1}>
-                    <line
-                      x1="0"
-                      y1="0"
-                      x2={n.x}
-                      y2={n.y}
+                    <path
+                      d={path}
+                      fill="none"
                       stroke={n.color}
-                      strokeOpacity={isHover || isActive ? 0.85 : 0.28}
-                      strokeWidth={isHover || isActive ? 1.8 : 1}
+                      strokeOpacity={isHover || isActive ? 0.9 : 0.25}
+                      strokeWidth={isHover || isActive ? 2 : 1.2}
+                      strokeLinecap="round"
                     />
                     <circle r="3" fill={n.color}>
                       <animateMotion
                         dur={`${2.2 + (parseInt(n.id, 36) % 3) * 0.4}s`}
                         repeatCount="indefinite"
-                        path={`M0,0 L${n.x},${n.y}`}
+                        path={path}
                       />
                       <animate
                         attributeName="opacity"
@@ -414,12 +255,18 @@ export default function NetworkMap() {
                 );
               })}
 
-              {/* Center node — user's store */}
+              {/* Center hub — store */}
               <g>
-                <circle r="40" fill="var(--accent)" opacity="0.15">
+                <circle
+                  cx={CENTER.x}
+                  cy={CENTER.y}
+                  r={HUB_R - 8}
+                  fill="var(--accent)"
+                  opacity="0.15"
+                >
                   <animate
                     attributeName="r"
-                    values="40;58;40"
+                    values={`${HUB_R - 8};${HUB_R + 12};${HUB_R - 8}`}
                     dur="2.5s"
                     repeatCount="indefinite"
                   />
@@ -430,11 +277,23 @@ export default function NetworkMap() {
                     repeatCount="indefinite"
                   />
                 </circle>
-                <circle r="48" fill="var(--bg-elevated)" stroke="var(--accent)" strokeWidth="1.5" />
-                <circle r="34" fill="var(--accent)" />
+                <circle
+                  cx={CENTER.x}
+                  cy={CENTER.y}
+                  r={HUB_R}
+                  fill="var(--bg-elevated)"
+                  stroke="var(--accent)"
+                  strokeWidth="1.5"
+                />
+                <circle
+                  cx={CENTER.x}
+                  cy={CENTER.y}
+                  r={HUB_R - 14}
+                  fill="var(--accent)"
+                />
                 <text
-                  x="0"
-                  y="3"
+                  x={CENTER.x}
+                  y={CENTER.y - 4}
                   textAnchor="middle"
                   fontFamily="var(--font-space)"
                   fontWeight="700"
@@ -442,100 +301,104 @@ export default function NetworkMap() {
                   fill="#faf5ef"
                   letterSpacing="0.08em"
                 >
-                  YOUR STORE
+                  YOUR
+                </text>
+                <text
+                  x={CENTER.x}
+                  y={CENTER.y + 12}
+                  textAnchor="middle"
+                  fontFamily="var(--font-space)"
+                  fontWeight="700"
+                  fontSize="13"
+                  fill="#faf5ef"
+                  letterSpacing="0.08em"
+                >
+                  STORE
                 </text>
               </g>
-            </svg>
 
-            {/* Nodes (HTML — easier for hover/click + crisper text) */}
-            {positioned.map((n) => {
-              const isHover = hover === n.id;
-              const isActive = active?.id === n.id;
-              const dim = (hover && !isHover) || (active && !isActive);
-              const size = 60;
-              // Label position offset radially outward from the node
-              const labelOutset = 18;
-              const norm = Math.hypot(n.x, n.y);
-              const lx = n.x + (n.x / norm) * labelOutset;
-              const ly = n.y + (n.y / norm) * labelOutset;
+              {/* Nodes */}
+              {positioned.map((n) => {
+                const isHover = hover === n.id;
+                const isActive = active?.id === n.id;
+                const dim = (hover && !isHover) || (active && !isActive);
 
-              return (
-                <div
-                  key={n.id}
-                  className="absolute top-1/2 left-1/2 pointer-events-none"
-                  style={{
-                    transform: `translate(calc(-50% + ${(n.x / 960) * 100}%), calc(-50% + ${(n.y / 680) * 100}%))`,
-                    opacity: dim ? 0.35 : 1,
-                    transition: "opacity 200ms",
-                  }}
-                >
-                  <button
-                    onMouseEnter={() => setHover(n.id)}
-                    onMouseLeave={() => setHover(null)}
-                    onClick={() => setActive(n)}
-                    aria-label={`${n.label} — ${n.detail.type}, connected`}
-                    className="pointer-events-auto group"
-                    style={{ marginLeft: -size / 2, marginTop: -size / 2 }}
-                  >
-                    <div
-                      className="rounded-full flex items-center justify-center transition-all"
-                      style={{
-                        width: size,
-                        height: size,
-                        background: "var(--bg-elevated)",
-                        border: `1.5px solid ${isHover || isActive ? n.color : "var(--border)"}`,
-                        boxShadow:
-                          isHover || isActive
-                            ? `0 0 24px ${n.color}55, 0 0 0 1px ${n.color}`
-                            : "var(--shadow-card)",
-                        transform: isHover ? "scale(1.12)" : "scale(1)",
-                      }}
+                // Label position: left of buyers, right of logistics, below payments
+                const labelPos =
+                  n.category === "buyers"
+                    ? { x: n.x - NODE_R - 8, y: n.y + 4, anchor: "end" as const }
+                    : n.category === "logistics"
+                    ? { x: n.x + NODE_R + 8, y: n.y + 4, anchor: "start" as const }
+                    : { x: n.x, y: n.y + NODE_R + 18, anchor: "middle" as const };
+
+                return (
+                  <g key={n.id} opacity={dim ? 0.35 : 1} style={{ transition: "opacity 200ms" }}>
+                    {/* Hit box (transparent, larger than node for easier hover) */}
+                    <rect
+                      x={n.x - NODE_BOX / 2}
+                      y={n.y - NODE_BOX / 2}
+                      width={NODE_BOX}
+                      height={NODE_BOX}
+                      fill="transparent"
+                      style={{ cursor: "pointer" }}
+                      onMouseEnter={() => setHover(n.id)}
+                      onMouseLeave={() => setHover(null)}
+                      onClick={() => setActive(n)}
+                      role="button"
+                      aria-label={`${n.label} — ${n.detail.type}, connected`}
+                    />
+                    {/* Glow on hover */}
+                    {(isHover || isActive) && (
+                      <circle
+                        cx={n.x}
+                        cy={n.y}
+                        r={NODE_R + 10}
+                        fill={n.color}
+                        opacity="0.12"
+                      />
+                    )}
+                    <circle
+                      cx={n.x}
+                      cy={n.y}
+                      r={NODE_R}
+                      fill="var(--bg-elevated)"
+                      stroke={isHover || isActive ? n.color : "var(--border)"}
+                      strokeWidth={isHover || isActive ? 2 : 1.5}
+                      style={{ transition: "stroke 200ms" }}
+                    />
+                    <text
+                      x={n.x}
+                      y={n.y + 6}
+                      textAnchor="middle"
+                      fontSize="18"
+                      style={{ pointerEvents: "none" }}
                     >
-                      <span className="text-[18px]">{n.icon}</span>
-                    </div>
-                  </button>
-                </div>
-              );
-            })}
-
-            {/* Node labels — placed outside each node on the radial direction */}
-            {positioned.map((n) => {
-              const isHover = hover === n.id;
-              const isActive = active?.id === n.id;
-              const dim = (hover && !isHover) || (active && !isActive);
-              const norm = Math.hypot(n.x, n.y);
-              const offset = 44; // distance from node center
-              const lx = n.x + (n.x / norm) * offset;
-              const ly = n.y + (n.y / norm) * offset;
-              return (
-                <div
-                  key={`label-${n.id}`}
-                  className="absolute top-1/2 left-1/2 pointer-events-none whitespace-nowrap"
-                  style={{
-                    transform: `translate(calc(-50% + ${(lx / 960) * 100}%), calc(-50% + ${(ly / 680) * 100}%))`,
-                    opacity: dim ? 0.3 : 1,
-                    transition: "opacity 200ms",
-                  }}
-                >
-                  <div
-                    className="text-[11px] font-mono uppercase tracking-wider text-center"
-                    style={{
-                      color: isHover || isActive ? n.color : "var(--fg-muted)",
-                      transition: "color 200ms",
-                    }}
-                  >
-                    {n.label}
-                  </div>
-                </div>
-              );
-            })}
+                      {n.icon}
+                    </text>
+                    {/* Label */}
+                    <text
+                      x={labelPos.x}
+                      y={labelPos.y}
+                      textAnchor={labelPos.anchor}
+                      fontSize="12"
+                      fontFamily="var(--font-dm)"
+                      fontWeight="500"
+                      fill={isHover || isActive ? n.color : "var(--fg)"}
+                      style={{ pointerEvents: "none", transition: "fill 200ms" }}
+                    >
+                      {n.label}
+                    </text>
+                  </g>
+                );
+              })}
+            </svg>
           </div>
 
           {/* Legend */}
           <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[12px]">
-            <Legend color="var(--accent)" label="Buyer Apps" count={6} />
-            <Legend color="var(--secondary)" label="Logistics" count={3} />
-            <Legend color="var(--tertiary)" label="Payment Rails" count={3} />
+            <Legend color="var(--accent)" label="Buyer Apps" count={6} dir="→ orders in" />
+            <Legend color="var(--secondary)" label="Logistics" count={3} dir="→ delivery" />
+            <Legend color="var(--tertiary)" label="Payment Rails" count={3} dir="→ settled" />
           </div>
         </div>
       </div>
@@ -621,13 +484,69 @@ export default function NetworkMap() {
   );
 }
 
-function Legend({ color, label, count }: { color: string; label: string; count: number }) {
+function ZoneHeader({
+  x,
+  y,
+  label,
+  count,
+  color,
+  sub,
+}: {
+  x: number;
+  y: number;
+  label: string;
+  count: number;
+  color: string;
+  sub?: boolean;
+}) {
+  return (
+    <g>
+      <text
+        x={x}
+        y={y}
+        textAnchor="middle"
+        fontSize="11"
+        letterSpacing="0.2em"
+        fontFamily="var(--font-dm)"
+        fontWeight="600"
+        fill={color}
+        opacity="0.8"
+      >
+        {label}
+      </text>
+      <text
+        x={x}
+        y={y + (sub ? -14 : 14)}
+        textAnchor="middle"
+        fontSize="10"
+        fontFamily="var(--font-jetbrains)"
+        fill="var(--fg-muted)"
+      >
+        {count} connected
+      </text>
+    </g>
+  );
+}
+
+function Legend({
+  color,
+  label,
+  count,
+  dir,
+}: {
+  color: string;
+  label: string;
+  count: number;
+  dir: string;
+}) {
   return (
     <div className="flex items-center gap-2 text-fg-muted">
       <span className="w-2 h-2 rounded-full" style={{ background: color }} />
-      <span className="font-medium">{label}</span>
+      <span className="font-medium" style={{ color }}>{label}</span>
       <span className="text-fg-muted/60">·</span>
       <span className="font-mono">{count}</span>
+      <span className="text-fg-muted/60 hidden sm:inline">·</span>
+      <span className="hidden sm:inline text-[11px]">{dir}</span>
     </div>
   );
 }
