@@ -1,27 +1,23 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type Node = {
   id: string;
   label: string;
-  ring: 1 | 2 | 3;
-  angle: number;
-  color: string;
+  category: "buyers" | "logistics" | "payments";
   icon: string;
+  color: string;
   detail: { type: string; stats: { label: string; value: string }[] };
 };
 
-const RING_RADII = { 1: 180, 2: 280, 3: 380 };
-
 const nodes: Node[] = [
-  // Ring 1 — Buyer apps
+  // Buyer apps (top arc)
   {
     id: "paytm",
     label: "Paytm",
-    ring: 1,
-    angle: -90,
+    category: "buyers",
     color: "var(--accent)",
     icon: "P",
     detail: {
@@ -36,8 +32,7 @@ const nodes: Node[] = [
   {
     id: "phonepe",
     label: "PhonePe",
-    ring: 1,
-    angle: -30,
+    category: "buyers",
     color: "var(--accent)",
     icon: "P",
     detail: {
@@ -52,8 +47,7 @@ const nodes: Node[] = [
   {
     id: "magicpin",
     label: "Magicpin",
-    ring: 1,
-    angle: 30,
+    category: "buyers",
     color: "var(--accent)",
     icon: "M",
     detail: {
@@ -68,8 +62,7 @@ const nodes: Node[] = [
   {
     id: "snapdeal",
     label: "Snapdeal",
-    ring: 1,
-    angle: 90,
+    category: "buyers",
     color: "var(--accent)",
     icon: "S",
     detail: {
@@ -84,8 +77,7 @@ const nodes: Node[] = [
   {
     id: "meesho",
     label: "Meesho",
-    ring: 1,
-    angle: 150,
+    category: "buyers",
     color: "var(--accent)",
     icon: "M",
     detail: {
@@ -100,8 +92,7 @@ const nodes: Node[] = [
   {
     id: "mystore",
     label: "MyStore",
-    ring: 1,
-    angle: 210,
+    category: "buyers",
     color: "var(--accent)",
     icon: "M",
     detail: {
@@ -114,12 +105,11 @@ const nodes: Node[] = [
     },
   },
 
-  // Ring 2 — Logistics
+  // Logistics (bottom-right arc)
   {
     id: "delhivery",
     label: "Delhivery",
-    ring: 2,
-    angle: -60,
+    category: "logistics",
     color: "var(--secondary)",
     icon: "🚚",
     detail: {
@@ -134,8 +124,7 @@ const nodes: Node[] = [
   {
     id: "dunzo",
     label: "Dunzo",
-    ring: 2,
-    angle: 60,
+    category: "logistics",
     color: "var(--secondary)",
     icon: "🛵",
     detail: {
@@ -150,8 +139,7 @@ const nodes: Node[] = [
   {
     id: "shiprocket",
     label: "Shiprocket",
-    ring: 2,
-    angle: 180,
+    category: "logistics",
     color: "var(--secondary)",
     icon: "📦",
     detail: {
@@ -164,12 +152,11 @@ const nodes: Node[] = [
     },
   },
 
-  // Ring 3 — Payment rails
+  // Payment rails (bottom-left arc)
   {
     id: "upi",
     label: "UPI",
-    ring: 3,
-    angle: -120,
+    category: "payments",
     color: "var(--tertiary)",
     icon: "⚡",
     detail: {
@@ -184,8 +171,7 @@ const nodes: Node[] = [
   {
     id: "cards",
     label: "Cards",
-    ring: 3,
-    angle: 0,
+    category: "payments",
     color: "var(--tertiary)",
     icon: "💳",
     detail: {
@@ -200,8 +186,7 @@ const nodes: Node[] = [
   {
     id: "netbanking",
     label: "NetBanking",
-    ring: 3,
-    angle: 120,
+    category: "payments",
     color: "var(--tertiary)",
     icon: "🏦",
     detail: {
@@ -215,15 +200,71 @@ const nodes: Node[] = [
   },
 ];
 
-function polar(ring: 1 | 2 | 3, angle: number) {
-  const r = RING_RADII[ring];
-  const rad = (angle * Math.PI) / 180;
+/**
+ * Sectored radial layout — each category gets its own angular wedge so
+ * labels never compete for the same arc.
+ *
+ * Angle convention: 0° points right, 90° points down (SVG default).
+ * - Buyers:    top arc, 200° → 340° (counter-clockwise through 270° = top)
+ * - Logistics: bottom-right, 20° → 80°
+ * - Payments:  bottom-left, 100° → 160°
+ */
+const SECTORS = {
+  buyers: { start: 200, end: 340, radius: 220, label: "Buyer Apps" },
+  logistics: { start: 20, end: 80, radius: 240, label: "Logistics" },
+  payments: { start: 100, end: 160, radius: 240, label: "Payment Rails" },
+} as const;
+
+function polar(deg: number, r: number) {
+  const rad = (deg * Math.PI) / 180;
   return { x: Math.cos(rad) * r, y: Math.sin(rad) * r };
+}
+
+function arcPath(startDeg: number, endDeg: number, r: number, sweep = 0) {
+  const s = polar(startDeg, r);
+  const e = polar(endDeg, r);
+  const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+  return `M ${s.x} ${s.y} A ${r} ${r} 0 ${large} ${sweep} ${e.x} ${e.y}`;
+}
+
+function sectorWedge(startDeg: number, endDeg: number, inner: number, outer: number) {
+  const sOuter = polar(startDeg, outer);
+  const eOuter = polar(endDeg, outer);
+  const sInner = polar(startDeg, inner);
+  const eInner = polar(endDeg, inner);
+  const large = Math.abs(endDeg - startDeg) > 180 ? 1 : 0;
+  return `
+    M ${sOuter.x} ${sOuter.y}
+    A ${outer} ${outer} 0 ${large} 1 ${eOuter.x} ${eOuter.y}
+    L ${eInner.x} ${eInner.y}
+    A ${inner} ${inner} 0 ${large} 0 ${sInner.x} ${sInner.y}
+    Z
+  `;
 }
 
 export default function NetworkMap() {
   const [active, setActive] = useState<Node | null>(null);
   const [hover, setHover] = useState<string | null>(null);
+
+  // Precompute positions for each node
+  const positioned = useMemo(() => {
+    const groups = ["buyers", "logistics", "payments"] as const;
+    const result: (Node & { x: number; y: number; angle: number })[] = [];
+    groups.forEach((cat) => {
+      const sec = SECTORS[cat];
+      const items = nodes.filter((n) => n.category === cat);
+      const span = sec.end - sec.start;
+      // Distribute evenly with margin from edges
+      items.forEach((n, i) => {
+        const t = items.length === 1 ? 0.5 : i / (items.length - 1);
+        // Add 8% inset on each side so nodes don't kiss the wedge edges
+        const angle = sec.start + (0.08 + t * 0.84) * span;
+        const { x, y } = polar(angle, sec.radius);
+        result.push({ ...n, x, y, angle });
+      });
+    });
+    return result;
+  }, []);
 
   return (
     <section id="network" className="relative py-[96px] lg:py-[128px] overflow-hidden">
@@ -244,31 +285,104 @@ export default function NetworkMap() {
         </div>
 
         <div className="relative">
-          {/* Graph */}
-          <div className="relative aspect-[16/10] lg:aspect-[16/9] max-w-[900px] mx-auto">
-            {/* Ring guides */}
+          <div className="relative aspect-[5/4] max-w-[920px] mx-auto">
             <svg
-              viewBox="-450 -300 900 600"
+              viewBox="-480 -340 960 680"
               className="absolute inset-0 w-full h-full"
               preserveAspectRatio="xMidYMid meet"
             >
-              {/* Ring circles */}
-              {[1, 2, 3].map((r) => (
-                <circle
-                  key={r}
-                  cx="0"
-                  cy="0"
-                  r={RING_RADII[r as 1 | 2 | 3]}
-                  fill="none"
-                  stroke="rgba(250,245,239,0.05)"
-                  strokeDasharray="2 6"
-                  strokeWidth="1"
-                />
-              ))}
+              <defs>
+                <radialGradient id="buyers-grad" cx="0.5" cy="0.5" r="0.5">
+                  <stop offset="0%" stopColor="var(--accent)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--accent)" stopOpacity="0.08" />
+                </radialGradient>
+                <radialGradient id="logistics-grad" cx="0.5" cy="0.5" r="0.5">
+                  <stop offset="0%" stopColor="var(--secondary)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--secondary)" stopOpacity="0.08" />
+                </radialGradient>
+                <radialGradient id="payments-grad" cx="0.5" cy="0.5" r="0.5">
+                  <stop offset="0%" stopColor="var(--tertiary)" stopOpacity="0" />
+                  <stop offset="100%" stopColor="var(--tertiary)" stopOpacity="0.08" />
+                </radialGradient>
+              </defs>
+
+              {/* Sector wedges (very faint backdrops) */}
+              {(["buyers", "logistics", "payments"] as const).map((cat) => {
+                const sec = SECTORS[cat];
+                return (
+                  <path
+                    key={cat}
+                    d={sectorWedge(sec.start, sec.end, 110, sec.radius + 80)}
+                    fill={`url(#${cat}-grad)`}
+                  />
+                );
+              })}
+
+              {/* Sector arc rails (where nodes sit) */}
+              {(["buyers", "logistics", "payments"] as const).map((cat) => {
+                const sec = SECTORS[cat];
+                const color =
+                  cat === "buyers"
+                    ? "var(--accent)"
+                    : cat === "logistics"
+                    ? "var(--secondary)"
+                    : "var(--tertiary)";
+                return (
+                  <path
+                    key={`rail-${cat}`}
+                    d={arcPath(sec.start, sec.end, sec.radius, 1)}
+                    fill="none"
+                    stroke={color}
+                    strokeOpacity="0.15"
+                    strokeWidth="1.5"
+                    strokeDasharray="3 6"
+                  />
+                );
+              })}
+
+              {/* Sector labels (curved, follow the arc) */}
+              {(["buyers", "logistics", "payments"] as const).map((cat) => {
+                const sec = SECTORS[cat];
+                const mid = (sec.start + sec.end) / 2;
+                const labelR = sec.radius + 64;
+                const { x, y } = polar(mid, labelR);
+                const color =
+                  cat === "buyers"
+                    ? "var(--accent)"
+                    : cat === "logistics"
+                    ? "var(--secondary)"
+                    : "var(--tertiary)";
+                return (
+                  <g key={`label-${cat}`}>
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      fontSize="11"
+                      letterSpacing="0.2em"
+                      fontFamily="var(--font-dm)"
+                      fontWeight="600"
+                      fill={color}
+                      opacity="0.7"
+                    >
+                      {sec.label.toUpperCase()}
+                    </text>
+                    <text
+                      x={x}
+                      y={y + 14}
+                      textAnchor="middle"
+                      fontSize="10"
+                      fontFamily="var(--font-jetbrains)"
+                      fill="var(--fg-muted)"
+                    >
+                      {nodes.filter((n) => n.category === cat).length} nodes
+                    </text>
+                  </g>
+                );
+              })}
 
               {/* Connection lines */}
-              {nodes.map((n) => {
-                const { x, y } = polar(n.ring, n.angle);
+              {positioned.map((n) => {
                 const isHover = hover === n.id;
                 const isActive = active?.id === n.id;
                 const dim = (hover && !isHover) || (active && !isActive);
@@ -277,23 +391,22 @@ export default function NetworkMap() {
                     <line
                       x1="0"
                       y1="0"
-                      x2={x}
-                      y2={y}
+                      x2={n.x}
+                      y2={n.y}
                       stroke={n.color}
-                      strokeOpacity={isHover || isActive ? 0.8 : 0.25}
-                      strokeWidth={isHover || isActive ? 1.5 : 1}
+                      strokeOpacity={isHover || isActive ? 0.85 : 0.28}
+                      strokeWidth={isHover || isActive ? 1.8 : 1}
                     />
-                    {/* Data packet */}
                     <circle r="3" fill={n.color}>
                       <animateMotion
-                        dur={`${2 + (parseInt(n.id, 36) % 3)}s`}
+                        dur={`${2.2 + (parseInt(n.id, 36) % 3) * 0.4}s`}
                         repeatCount="indefinite"
-                        path={`M0,0 L${x},${y}`}
+                        path={`M0,0 L${n.x},${n.y}`}
                       />
                       <animate
                         attributeName="opacity"
                         values="0;1;1;0"
-                        dur={`${2 + (parseInt(n.id, 36) % 3)}s`}
+                        dur={`${2.2 + (parseInt(n.id, 36) % 3) * 0.4}s`}
                         repeatCount="indefinite"
                       />
                     </circle>
@@ -303,84 +416,123 @@ export default function NetworkMap() {
 
               {/* Center node — user's store */}
               <g>
-                <circle r="34" cx="0" cy="0" fill="var(--accent)" opacity="0.15">
+                <circle r="40" fill="var(--accent)" opacity="0.15">
                   <animate
                     attributeName="r"
-                    values="34;52;34"
+                    values="40;58;40"
                     dur="2.5s"
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="opacity"
-                    values="0.25;0;0.25"
+                    values="0.28;0;0.28"
                     dur="2.5s"
                     repeatCount="indefinite"
                   />
                 </circle>
-                <circle r="28" cx="0" cy="0" fill="var(--accent)" />
+                <circle r="48" fill="var(--bg-elevated)" stroke="var(--accent)" strokeWidth="1.5" />
+                <circle r="34" fill="var(--accent)" />
                 <text
                   x="0"
-                  y="4"
+                  y="3"
                   textAnchor="middle"
                   fontFamily="var(--font-space)"
                   fontWeight="700"
-                  fontSize="11"
-                  fill="var(--fg)"
-                  letterSpacing="0.05em"
+                  fontSize="13"
+                  fill="#faf5ef"
+                  letterSpacing="0.08em"
                 >
-                  YOU
+                  YOUR STORE
                 </text>
               </g>
             </svg>
 
-            {/* Nodes (HTML for hover/click) */}
-            {nodes.map((n) => {
-              const { x, y } = polar(n.ring, n.angle);
+            {/* Nodes (HTML — easier for hover/click + crisper text) */}
+            {positioned.map((n) => {
               const isHover = hover === n.id;
               const isActive = active?.id === n.id;
               const dim = (hover && !isHover) || (active && !isActive);
+              const size = 60;
+              // Label position offset radially outward from the node
+              const labelOutset = 18;
+              const norm = Math.hypot(n.x, n.y);
+              const lx = n.x + (n.x / norm) * labelOutset;
+              const ly = n.y + (n.y / norm) * labelOutset;
+
               return (
-                <button
+                <div
                   key={n.id}
-                  onMouseEnter={() => setHover(n.id)}
-                  onMouseLeave={() => setHover(null)}
-                  onClick={() => setActive(n)}
-                  aria-label={`${n.label} — ${n.detail.type}, connected`}
-                  className="absolute top-1/2 left-1/2 group transition-all"
+                  className="absolute top-1/2 left-1/2 pointer-events-none"
                   style={{
-                    transform: `translate(calc(-50% + ${(x / 900) * 100}%), calc(-50% + ${(y / 600) * 100}%))`,
+                    transform: `translate(calc(-50% + ${(n.x / 960) * 100}%), calc(-50% + ${(n.y / 680) * 100}%))`,
                     opacity: dim ? 0.35 : 1,
+                    transition: "opacity 200ms",
+                  }}
+                >
+                  <button
+                    onMouseEnter={() => setHover(n.id)}
+                    onMouseLeave={() => setHover(null)}
+                    onClick={() => setActive(n)}
+                    aria-label={`${n.label} — ${n.detail.type}, connected`}
+                    className="pointer-events-auto group"
+                    style={{ marginLeft: -size / 2, marginTop: -size / 2 }}
+                  >
+                    <div
+                      className="rounded-full flex items-center justify-center transition-all"
+                      style={{
+                        width: size,
+                        height: size,
+                        background: "var(--bg-elevated)",
+                        border: `1.5px solid ${isHover || isActive ? n.color : "var(--border)"}`,
+                        boxShadow:
+                          isHover || isActive
+                            ? `0 0 24px ${n.color}55, 0 0 0 1px ${n.color}`
+                            : "var(--shadow-card)",
+                        transform: isHover ? "scale(1.12)" : "scale(1)",
+                      }}
+                    >
+                      <span className="text-[18px]">{n.icon}</span>
+                    </div>
+                  </button>
+                </div>
+              );
+            })}
+
+            {/* Node labels — placed outside each node on the radial direction */}
+            {positioned.map((n) => {
+              const isHover = hover === n.id;
+              const isActive = active?.id === n.id;
+              const dim = (hover && !isHover) || (active && !isActive);
+              const norm = Math.hypot(n.x, n.y);
+              const offset = 44; // distance from node center
+              const lx = n.x + (n.x / norm) * offset;
+              const ly = n.y + (n.y / norm) * offset;
+              return (
+                <div
+                  key={`label-${n.id}`}
+                  className="absolute top-1/2 left-1/2 pointer-events-none whitespace-nowrap"
+                  style={{
+                    transform: `translate(calc(-50% + ${(lx / 960) * 100}%), calc(-50% + ${(ly / 680) * 100}%))`,
+                    opacity: dim ? 0.3 : 1,
+                    transition: "opacity 200ms",
                   }}
                 >
                   <div
-                    className="rounded-full flex items-center justify-center transition-all"
+                    className="text-[11px] font-mono uppercase tracking-wider text-center"
                     style={{
-                      width: n.ring === 1 ? 56 : n.ring === 2 ? 48 : 42,
-                      height: n.ring === 1 ? 56 : n.ring === 2 ? 48 : 42,
-                      background: "var(--bg-elevated)",
-                      border: `1.5px solid ${isHover || isActive ? n.color : "var(--border)"}`,
-                      boxShadow:
-                        isHover || isActive
-                          ? `0 0 24px ${n.color}55, 0 0 0 1px ${n.color}`
-                          : "var(--shadow-card)",
-                      transform: isHover ? "scale(1.1)" : "scale(1)",
+                      color: isHover || isActive ? n.color : "var(--fg-muted)",
+                      transition: "color 200ms",
                     }}
-                  >
-                    <span className="text-[16px]">{n.icon}</span>
-                  </div>
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 mt-1.5 text-[10px] font-mono uppercase tracking-wider whitespace-nowrap"
-                    style={{ color: isHover || isActive ? n.color : "var(--fg-muted)" }}
                   >
                     {n.label}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
 
           {/* Legend */}
-          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[12px]">
+          <div className="mt-6 flex flex-wrap justify-center gap-x-6 gap-y-2 text-[12px]">
             <Legend color="var(--accent)" label="Buyer Apps" count={6} />
             <Legend color="var(--secondary)" label="Logistics" count={3} />
             <Legend color="var(--tertiary)" label="Payment Rails" count={3} />
@@ -428,8 +580,8 @@ export default function NetworkMap() {
                 <div
                   className="rounded-lg p-4 mb-6"
                   style={{
-                    background: `${active.color}10`,
-                    border: `1px solid ${active.color}30`,
+                    background: `color-mix(in srgb, ${active.color} 10%, transparent)`,
+                    border: `1px solid color-mix(in srgb, ${active.color} 30%, transparent)`,
                   }}
                 >
                   <div className="flex items-center gap-2">
