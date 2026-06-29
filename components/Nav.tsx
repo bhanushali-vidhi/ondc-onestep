@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const links = [
   { label: "Features", href: "#features" },
@@ -49,6 +50,7 @@ export default function Nav() {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle />
           <a
             href="/login"
             className="text-[14px] font-medium text-fg-muted hover:text-fg transition-colors px-4 py-2"
@@ -112,6 +114,9 @@ export default function Nav() {
                 transition={{ delay: 0.05 * links.length }}
                 className="flex flex-col gap-3 pt-6"
               >
+                <div className="flex justify-center pb-2">
+                  <ThemeToggle size={44} />
+                </div>
                 <a href="/login" className="btn-ghost w-full justify-center">
                   Login
                 </a>

@@ -84,7 +84,7 @@ export default function Pricing() {
                   : "1px solid var(--border)",
                 boxShadow: t.featured
                   ? "0 24px 60px rgba(255,107,53,0.18), 0 0 0 1px rgba(255,107,53,0.25)"
-                  : "0 2px 8px rgba(0,0,0,0.3)",
+                  : "var(--shadow-card)",
               }}
             >
               {t.featured && (

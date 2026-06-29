@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,13 +35,16 @@ export default function LoginPage() {
     <div className="min-h-screen grid lg:grid-cols-[1fr_1fr]">
       {/* Left: Form */}
       <div className="flex flex-col px-6 sm:px-12 lg:px-16 py-8 lg:py-12">
-        <Link
-          href="/"
-          className="font-display font-bold text-[20px] tracking-tight self-start"
-        >
-          <span className="text-accent">ONDC</span>
-          <span className="text-fg"> OneStep</span>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/"
+            className="font-display font-bold text-[20px] tracking-tight"
+          >
+            <span className="text-accent">ONDC</span>
+            <span className="text-fg"> OneStep</span>
+          </Link>
+          <ThemeToggle />
+        </div>
 
         <div className="flex-1 flex items-center">
           <div className="w-full max-w-[420px] mx-auto">

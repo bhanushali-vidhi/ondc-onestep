@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider, NO_FLASH_SCRIPT } from "@/lib/themeContext";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -36,7 +37,11 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${spaceGrotesk.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}
+      suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: NO_FLASH_SCRIPT }} />
+      </head>
       <body>
         <a
           href="#main"
@@ -44,7 +49,7 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

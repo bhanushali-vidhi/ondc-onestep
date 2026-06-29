@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useStore } from "@/lib/storeContext";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const STEPS = [
   "Business",
@@ -166,15 +167,18 @@ export default function OnboardingPage() {
         <div className="text-[12px] text-fg-muted hidden sm:block">
           Step {step + 1} of {STEPS.length} · {STEPS[step]}
         </div>
-        <button
-          onClick={() => {
-            setOnboarded(true);
-            router.push("/dashboard");
-          }}
-          className="text-[12px] text-fg-muted hover:text-fg"
-        >
-          Skip for now →
-        </button>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <button
+            onClick={() => {
+              setOnboarded(true);
+              router.push("/dashboard");
+            }}
+            className="text-[12px] text-fg-muted hover:text-fg"
+          >
+            Skip for now →
+          </button>
+        </div>
       </header>
 
       {/* Progress bar */}

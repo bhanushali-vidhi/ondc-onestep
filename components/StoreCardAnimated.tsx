@@ -55,8 +55,8 @@ export default function StoreCardAnimated() {
               stage >= 3
                 ? "0 20px 60px rgba(0,214,143,0.15), 0 0 0 1px rgba(0,214,143,0.2)"
                 : stage >= 1
-                ? "0 20px 60px rgba(0,0,0,0.4), 0 0 0 1px var(--border)"
-                : "0 8px 24px rgba(0,0,0,0.3)",
+                ? "var(--shadow-elevated)"
+                : "var(--shadow-card)",
           }}
         >
           {/* Top bar */}
@@ -174,7 +174,7 @@ export default function StoreCardAnimated() {
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.3 }}
             className="px-4 py-2.5 rounded-xl bg-bg-elevated border border-border-active flex items-center gap-2.5"
-            style={{ boxShadow: "0 12px 32px rgba(0,0,0,0.4)" }}
+            style={{ boxShadow: "var(--shadow-elevated)" }}
           >
             <div className="w-7 h-7 rounded-md bg-accent/15 flex items-center justify-center">
               <span className="text-accent text-[13px]">✓</span>

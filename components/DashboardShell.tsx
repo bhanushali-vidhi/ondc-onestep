@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useStore } from "@/lib/storeContext";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: OverviewIcon },
@@ -268,6 +269,7 @@ export default function DashboardShell({
           </div>
 
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <button
               onClick={() => setCmdOpen(true)}
               className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md bg-bg-card border border-border text-[12px] text-fg-muted hover:text-fg transition-colors"

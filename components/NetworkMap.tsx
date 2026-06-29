@@ -362,7 +362,7 @@ export default function NetworkMap() {
                       boxShadow:
                         isHover || isActive
                           ? `0 0 24px ${n.color}55, 0 0 0 1px ${n.color}`
-                          : "0 4px 12px rgba(0,0,0,0.3)",
+                          : "var(--shadow-card)",
                       transform: isHover ? "scale(1.1)" : "scale(1)",
                     }}
                   >
