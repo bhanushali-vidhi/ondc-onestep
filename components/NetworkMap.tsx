@@ -355,6 +355,7 @@ export default function NetworkMap() {
                         r={NODE_R + 10}
                         fill={n.color}
                         opacity="0.12"
+                        pointerEvents="none"
                       />
                     )}
                     <circle
@@ -365,13 +366,14 @@ export default function NetworkMap() {
                       stroke={isHover || isActive ? n.color : "var(--border)"}
                       strokeWidth={isHover || isActive ? 2 : 1.5}
                       style={{ transition: "stroke 200ms" }}
+                      pointerEvents="none"
                     />
                     <text
                       x={n.x}
                       y={n.y + 6}
                       textAnchor="middle"
                       fontSize="18"
-                      style={{ pointerEvents: "none" }}
+                      pointerEvents="none"
                     >
                       {n.icon}
                     </text>
@@ -384,7 +386,8 @@ export default function NetworkMap() {
                       fontFamily="var(--font-dm)"
                       fontWeight="500"
                       fill={isHover || isActive ? n.color : "var(--fg)"}
-                      style={{ pointerEvents: "none", transition: "fill 200ms" }}
+                      pointerEvents="none"
+                      style={{ transition: "fill 200ms" }}
                     >
                       {n.label}
                     </text>
